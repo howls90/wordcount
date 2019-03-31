@@ -1,0 +1,7 @@
+flask
+flask-RestPlus
+pytest
+pytest-flask
+beautifulsoup4
+redis
+validator-collection

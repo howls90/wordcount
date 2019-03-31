@@ -1,0 +1,28 @@
+version: '3'
+services:
+  # web:
+  #   image: nginx
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   links:
+  #     - app
+  #   volumes:
+  #     - .:/myapp
+  #     - ./nginx:/etc/nginx/conf.d
+
+  redis:
+    image: "redis:alpine"
+
+  app:
+    build: .
+    # command: flask run --host 0.0.0.0 --port 5000
+    command: python app.py
+    depends_on:
+      - redis
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/wordcount
+
