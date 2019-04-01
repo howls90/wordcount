@@ -4,4 +4,5 @@ pytest
 pytest-flask
 beautifulsoup4
 redis
-validator-collection
+flask_marshmallow
+marshmallow
