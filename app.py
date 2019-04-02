@@ -1,11 +1,11 @@
 from flask import Flask
-from apis import api
 import os
 import logging
 from logging import Formatter, FileHandler
+from apis.v1 import v1, api
 
 app = Flask(__name__)
-
+app.register_blueprint(v1, url_prefix='/v1')
 api.init_app(app)
 
 def setUpLogs():

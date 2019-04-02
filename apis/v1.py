@@ -1,10 +1,18 @@
-from flask_restplus import Namespace, Resource, fields, inputs
-from flask import current_app
-from flask import Flask, request, jsonify
+from flask_restplus import Namespace, Resource, fields, inputs, Api
+from flask import Flask, request, jsonify, Blueprint, current_app
 from models import WordCountSchema
 from services import WordCountService
 
-api = Namespace('Testing', description='Count how many times a word appear in a URL')
+v1 = Blueprint('v1_api', __name__, url_prefix='/myapi')
+api = Api(
+    title='WordCount API',
+    version='1.0',
+    description='Backend task to count how many times a certain word appear in a url',
+    catch_all_404s=True,
+    doc="/doc/",
+)
+
+count = api.namespace('count', description='Count number of times word appear in URL')
 
 request_model = api.model('Request', {
     'url': fields.String(required=True, description='URL to search'),
@@ -18,7 +26,13 @@ response_model = api.model('Response', {
     'count': fields.Integer(required=True, description='Number or time word appear'),
 })
 
-@api.route('/')
+@count.route('/test', endpoint='base-endpoint')
+class BaseResource(Resource):
+    def get(self):
+        return {"from":"base"}
+
+
+@count.route('/')
 class Count(Resource):
     @api.doc('WordCount')
     @api.expect(request_model)
