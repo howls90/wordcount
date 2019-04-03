@@ -1,0 +1,16 @@
+version: '3'
+services:
+  redis:
+    image: "redis:alpine"
+
+  app:
+    build: .
+    command: python app.py
+    depends_on:
+      - redis
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/wordcount
+
