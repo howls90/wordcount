@@ -6,3 +6,4 @@ beautifulsoup4
 redis
 flask_marshmallow
 marshmallow
+boto3
