@@ -6,3 +6,5 @@ output.log
 package.json
 package-lock.json
 serverless.yml
+venv/
+.vscode/

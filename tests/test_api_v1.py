@@ -12,7 +12,7 @@ def test_bad_character(client):
         'word':'@$^*&',
         'url':'http://www.virtusize.com'
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 400
     assert response.json == {"message": {"word": ["Word must be alphanumeric"]}}
 
@@ -23,7 +23,7 @@ def test_bad_word_break_line(client):
         'word':'@$^*&\n',
         'url':'http://www.virtusize.com'
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 400
     assert response.json == {"message": {"word": ["Word must be alphanumeric"]}}
 
@@ -33,7 +33,7 @@ def test_bad_word_spaces(client):
         'word':'@$^* &',
         'url':'http://www.virtusize.com'
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 400
     assert response.json == {"message": {"word": ["Word must be alphanumeric"]}}
 
@@ -43,7 +43,7 @@ def test_bad_url_protocol(client):
         'word':'fit',
         'url':'www.virtusize.com'
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 400
     assert response.json == {"message": {"url": ["Not a valid URL."]}}
 
@@ -53,7 +53,7 @@ def test_bad_url_domain(client):
         'word':'fit',
         'url':'http://www.virtusize'
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 404
     assert response.json == {"message": {"url": "URL was not found"}}
 
@@ -63,6 +63,6 @@ def test_sucess(client):
         "url": "http://www.virtusize.com",
         "word": "fit"
     }
-    response = client.post("/count/count", data=json.dumps(data), headers=headers)
+    response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 200
     assert response.json == {'count': 10, 'url': 'http://www.virtusize.com', 'word': 'fit'}

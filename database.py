@@ -101,7 +101,6 @@ class DB:
             current_app.logger.error(e.response['Error']['Message'])
         else:
             if response.get('Item') != None:
-                current_app.logger.error(response['Item']['count'])
                 return response['Item']['count']
         return None 
 

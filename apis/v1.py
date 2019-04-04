@@ -4,30 +4,31 @@ from models.models import WordCountSchema
 from services import WordCountService
 from werkzeug.exceptions import BadRequest
 
-v1 = Blueprint('v1_api', __name__)
+blueprint = Blueprint('api_v1', __name__)
 api = Api(
+    blueprint,
     title='WordCount API',
     version='1.0',
     catch_all_404s=True,
-    description='Backend task to count how many times a certain word appear in a url',
-    doc="/doc/"
+    description='Wordcount number of times word appear (Letter case is taking into account)',
+    doc="/doc/",
+    default='Count', 
+    default_label='Counter endpoints'
 )
 
-count = api.namespace('count', description='Count number of times word appear in URL')
-
 request_model = api.model('Request', {
-    'url': fields.String(required=True, description='URL to search'),
-    'word': fields.String(required=True, description='Word to search'),
+    'url': fields.String('http://www.virtusize.com', required=True, description='URL to search'),
+    'word': fields.String('fit', required=True, description='Word to search'),
 })
 
 response_model = api.model('Response', {
     'url': fields.String(required=True, description='URL to search'),
     'word': fields.String(required=True, description='Word to search'),
-    'count': fields.Integer(required=True, description='Number or time word appear'),
+    'count': fields.Integer(required=True, description='Number or times word appear'),
 })
 
 
-@count.route('/count')
+@api.route('/')
 class Count(Resource):
     @api.doc('WordCount')
     @api.expect(request_model)

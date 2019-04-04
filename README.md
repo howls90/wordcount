@@ -1,17 +1,17 @@
-#Wordcount API
+# Wordcount API
 
-##Run Application
+## Run Application
 ```
 $ docker-compose up
 ```
 
-##Testing
+## Testing
 ```
 $ docker-compose run app python -m pytest
 ```
 
-##Api Documentation
+## Api Documentation
 ```
-http://localhost:5000/doc 
+http://localhost:5000/api/v1/doc 
 ````
 

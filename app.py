@@ -1,12 +1,11 @@
 from flask import Flask
 import logging
 from logging import Formatter, FileHandler
-from apis.v1 import v1, api
+from apis.v1 import blueprint, api
 from database import DB
 
 app = Flask(__name__)
-api.init_app(app)
-app.register_blueprint(v1)
+app.register_blueprint(blueprint, url_prefix='/api/v1') 
 
 def setUpLogs():
     ''' Setup the logs configuration ''' 
@@ -19,7 +18,7 @@ def setUpLogs():
     app.logger.addHandler(handler)
     app.logger.addHandler(file_handler)
 
-def setUpDb(config):
+def setUpDb(app, config):
     ''' Setup the database and create the table ''' 
     app.config.from_object(config)   
     with app.app_context():
@@ -34,5 +33,5 @@ def setUpDb(config):
 
 if __name__ == "__main__":
     setUpLogs()
-    setUpDb('config.DevelopmentConfig')
+    setUpDb(app, 'config.DevelopmentConfig')
     app.run(host="0.0.0.0")
