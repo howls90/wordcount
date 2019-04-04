@@ -45,7 +45,7 @@ def test_bad_url_protocol(client):
     }
     response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 400
-    assert response.json == {"message": {"url": ["Not a valid URL."]}}
+    assert response.json == {'message': {'url': ['Not a valid URL.']}}
 
 def test_bad_url_domain(client):
     '''Check bad url bad input bad domain'''
@@ -55,7 +55,7 @@ def test_bad_url_domain(client):
     }
     response = client.post("/api/v1/", data=json.dumps(data), headers=headers)
     assert response.status_code == 404
-    assert response.json == {"message": {"url": "URL was not found"}}
+    assert response.json == {"message": "URL was not found"}
 
 def test_sucess(client):
     ''' Check correct payload '''
