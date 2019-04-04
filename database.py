@@ -1,113 +1,113 @@
-from redis import Redis, RedisError
+from __future__ import print_function
 from flask import current_app
+import boto3
+from botocore.exceptions import ClientError
+from werkzeug.exceptions import InternalServerError
+import decimal
+import json
+
 
 class DB:
+    __instance = None
+    table_name = None
+    client = None
+
+    @staticmethod
+    def getInstance():
+        """ Static access method. """
+        if DB.__instance == None:
+            DB()
+        return DB.__instance 
+
     def __init__(self):
+        """ Virtually private constructor. """
+        if DB.__instance != None:
+            DB.getInstance()
+        else:
+            DB.__instance = self
+
+    def conn(self, table_name, region_name, endpoint_url, aws_access_key_id, aws_secret_access_key):
         '''Create connection'''
-        self.r = Redis(host="redis", db=0, socket_connect_timeout=2, socket_timeout=2)
+        DB.table_name = table_name
+        DB.client = boto3.resource('dynamodb', 
+                                    region_name = region_name, 
+                                    endpoint_url = endpoint_url, 
+                                    aws_access_key_id = aws_access_key_id, 
+                                    aws_secret_access_key = aws_secret_access_key)
 
-    def save(self, key, value):
-        '''Save results'''
+    def createTable(self):
+        ''' Create Table if not exist '''
         try:
-            self.r.set(key, value)
-        except Exception as e:
-            current_app.logger.error(e)
+            table = DB.client.create_table(
+                TableName = DB.table_name,
+                KeySchema = [
+                    {
+                        'AttributeName': 'word',
+                        'KeyType': 'HASH'  #Partition key
+                    },
+                    {
+                        'AttributeName': 'url',
+                        'KeyType': 'RANGE'  #Sort key
+                    }
+                ],
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': 'word',
+                        'AttributeType': 'S'
+                    },
+                    {
+                        'AttributeName': 'url',
+                        'AttributeType': 'S'
+                    },
+                ],
+                ProvisionedThroughput={
+                    'ReadCapacityUnits': 10,
+                    'WriteCapacityUnits': 10
+                }
+            )
+            current_app.logger.error('Table successfully created!')
+        except ClientError as ce:
+            if str(ce) != 'An error occurred (ResourceInUseException) when calling the CreateTable operation: Cannot create preexisting table':
+                current_app.logger.error(ce)
+                raise InternalServerError()
 
-    def read(self, key):
-        '''Read results'''
-        msn = None
+    def save(self, word, url, count):
+        ''' Save item to the database '''
         try:
-            msg = self.r.get(key)
-        except Exception as e:
-            current_app.logger.error(e)
-        return msg
+            table = DB.client.Table(DB.table_name)
+            response = table.put_item(
+                Item={
+                        'word': word,
+                        'url': url,
+                        'count': count,
+                    }
+            )
+        except ClientError as e:
+            current_app.logger.error(e.response['Error']['Message'])
+        else:
+            return True
 
+    def read(self, word, url):
+        ''' Add item to the database '''
+        try:
+            table = DB.client.Table(DB.table_name)
+            response = table.get_item(
+                Key={
+                    'word': word,
+                    'url': url
+                }
+            )
+        except ClientError as e:
+            current_app.logger.error(e.response['Error']['Message'])
+        else:
+            if response.get('Item') != None:
+                return response['Item']['count']
+        return None 
 
-
-# from __future__ import print_function
-# import boto3
-# import decimal
-# import json
-
-
-# dynamodb = boto3.resource('dynamodb', region_name='us-west-2', endpoint_url="http://localhost:8000")
-
-# TABLE_NAME = 'WordCount'
-
-# # Helper class to convert a DynamoDB item to JSON.
-# class DecimalEncoder(json.JSONEncoder):
-#     def default(self, o):
-#         if isinstance(o, decimal.Decimal):
-#             if o % 1 > 0:
-#                 return float(o)
-#             else:
-#                 return int(o)
-#         return super(DecimalEncoder, self).default(o)
-
-
-# table = dynamodb.create_table(
-#     TableName=TABLE_NAME,
-#     KeySchema=[
-#         {
-#             'AttributeName': 'word',
-#             'KeyType': 'HASH'  #Partition key
-#         },
-#         {
-#             'AttributeName': 'url',
-#             'KeyType': 'RANGE'  #Sort key
-#         }
-#     ],
-#     AttributeDefinitions=[
-#         {
-#             'AttributeName': 'word',
-#             'AttributeType': 'S'
-#         },
-#         {
-#             'AttributeName': 'url',
-#             'AttributeType': 'S'
-#         },
-
-#     ],
-#     ProvisionedThroughput={
-#         'ReadCapacityUnits': 10,
-#         'WriteCapacityUnits': 10
-#     }
-# )
-
-# print("Table status:", table.table_status)
-
-# # PUT
-# table = dynamodb.Table(TABLE_NAME)
-
-# word = "aaa"
-# url = "bbbbb"
-
-# response = table.put_item(
-#    Item={
-#         'word': word,
-#         'url': url,
-#         'info': {
-#             'plot':"Nothing happens at all."
-#         }
-#     }
-# )
-
-# print("PutItem succeeded:")
-# print(json.dumps(response, indent=4, cls=DecimalEncoder))
-
-# # Read
-
-# try:
-#     response = table.get_item(
-#         Key={
-#             'word': word,
-#             'url': url
-#         }
-#     )
-# except ClientError as e:
-#     print(e.response['Error']['Message'])
-# else:
-#     item = response['Item']
-#     print("GetItem succeeded:")
-#     print(json.dumps(item, indent=4, cls=DecimalEncoder))
-        
+    def delete(self):
+        ''' Delete Table '''
+        try:
+            table = DB.client.Table(DB.table_name)
+            table.delete()
+        except ClientError as e:
+            current_app.logger.error(e.response['Error']['Message'])        
