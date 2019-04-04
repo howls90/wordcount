@@ -1,7 +1,5 @@
 # Wordcount API
 
-Worcount 
-
 ## Run Application
 ```
 $ docker-compose up
