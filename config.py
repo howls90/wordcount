@@ -18,7 +18,7 @@ class DevelopmentConfig(Config):
     ENPOINT_URL = "http://dynamodb:8000", 
     AWS_ACCESS_KEY_ID = 'xxx', 
     AWS_SECRET_ACCESS_KEY = 'xxx',
-    ERROR_404_HELP = True
+    ERROR_404_HELP = False
 
 class TestingConfig(Config):
     TESTING = True

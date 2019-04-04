@@ -4,12 +4,12 @@ from models.models import WordCountSchema
 from services import WordCountService
 from werkzeug.exceptions import BadRequest
 
+
 blueprint = Blueprint('api_v1', __name__)
 api = Api(
     blueprint,
     title='WordCount API',
     version='1.0',
-    catch_all_404s=True,
     description='Wordcount number of times word appear (Letter case is taking into account)',
     doc="/doc/",
     default='Count', 
@@ -27,17 +27,22 @@ response_model = api.model('Response', {
     'count': fields.Integer(required=True, description='Number or times word appear'),
 })
 
+errors_model_400 = api.model('Error400', {
+    'message': fields.Raw(example = {"field":["Error description"]})
+})
+
+errors_model_404 = api.model('Error404', {
+    'message': fields.Raw(example = 'URL was not found')
+})
 
 @api.route('/')
 class Count(Resource):
     @api.doc('WordCount')
     @api.expect(request_model)
     @api.marshal_with(response_model, code=200)
-    @api.doc(responses={
-        500: 'INTERNAL SERVER ERROR',
-        400: 'BAD REQUEST',
-        404: 'NOT FOUND'
-    })
+    @api.response(code=400, model=errors_model_400, description='Bad request')
+    @api.response(code=404, model=errors_model_404, description='Not Found')
+    @api.doc(responses={500: 'INTERNAL SERVER ERROR'})
     def post(self):
         '''Count number of times word appear in URL'''
         request = WordCountSchema().load(api.payload)

@@ -3,7 +3,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from flask import current_app
 from werkzeug.exceptions import NotFound
-import re
+import re, json
 
 def replace_all(text, dic):
     for i, j in dic.items():
@@ -16,7 +16,7 @@ def getAndProcess(url, word):
         html = urlopen(url)
         soup = BeautifulSoup(html, 'html.parser')
     except:
-        raise NotFound({'url':'URL was not found'})
+        raise NotFound('URL was not found')
     else:
         lines = soup.find_all(text=re.compile(word))
         opt = {".": " ", ",": " "}
