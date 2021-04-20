@@ -28,7 +28,7 @@ marshmallow==2.19.2
 more-itertools==7.0.0
 placebo==0.9.0
 pluggy==0.9.0
-py==1.8.0
+py==1.10.0
 pyrsistent==0.14.11
 pytest==4.4.0
 pytest-flask==0.14.0
